@@ -27,7 +27,7 @@ const HeroSection = () => {
             Plan smarter, greener routes across India using the power of AI
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex justify-center items-center">
             <Button 
               onClick={scrollToApp}
               size="lg" 
@@ -35,14 +35,6 @@ const HeroSection = () => {
             >
               Use the Tool
               <ArrowDown className="ml-2 w-5 h-5 animate-bounce" />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-eco-primary text-eco-primary hover:bg-eco-primary hover:text-white transition-all duration-300 px-8 py-6 text-lg"
-            >
-              Learn More
             </Button>
           </div>
         </div>
