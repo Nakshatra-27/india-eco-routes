@@ -26,7 +26,7 @@ const RouteOptimizer = () => {
     destination: "",
     fuelEfficiency: "",
     cargoWeight: "",
-    vehicleType: ""
+    weatherType: ""
   });
   const [results, setResults] = useState<RouteResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +39,7 @@ const RouteOptimizer = () => {
   ];
 
   const calculateRoutes = () => {
-    if (!formData.source || !formData.destination || !formData.fuelEfficiency || !formData.vehicleType) {
+    if (!formData.source || !formData.destination || !formData.fuelEfficiency || !formData.weatherType) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields to calculate routes.",
@@ -65,13 +65,23 @@ const RouteOptimizer = () => {
       const fuelEff = parseFloat(formData.fuelEfficiency);
       const cargoWeight = parseFloat(formData.cargoWeight) || 0;
       
+      // Weather impact multipliers
+      const weatherMultipliers = {
+        clear: 1.0,
+        rainy: 1.15,
+        foggy: 1.25,
+        storm: 1.4,
+        summer: 1.1
+      };
+      const weatherImpact = weatherMultipliers[formData.weatherType as keyof typeof weatherMultipliers] || 1.0;
+      
       const mockResults: RouteResult[] = [
         {
           id: 1,
           name: "Eco Route (Recommended)",
           distance: Math.round(baseDistance * 1.1),
-          estimatedTime: `${Math.round(baseDistance / 60 + 2)}h ${Math.round((baseDistance % 60) + 30)}m`,
-          co2Emissions: Math.round((baseDistance * 1.1 * 2.3) / fuelEff + (cargoWeight * 0.01)),
+          estimatedTime: `${Math.round((baseDistance / 60 + 2) * weatherImpact)}h ${Math.round(((baseDistance % 60) + 30) * weatherImpact)}m`,
+          co2Emissions: Math.round(((baseDistance * 1.1 * 2.3) / fuelEff + (cargoWeight * 0.01)) * weatherImpact),
           fuelCost: Math.round((baseDistance * 1.1 * 100) / fuelEff),
           description: "Optimized for lowest emissions with moderate travel time"
         },
@@ -79,8 +89,8 @@ const RouteOptimizer = () => {
           id: 2,
           name: "Fastest Route",
           distance: Math.round(baseDistance),
-          estimatedTime: `${Math.round(baseDistance / 70)}h ${Math.round((baseDistance % 70) + 15)}m`,
-          co2Emissions: Math.round((baseDistance * 2.5) / fuelEff + (cargoWeight * 0.012)),
+          estimatedTime: `${Math.round((baseDistance / 70) * weatherImpact)}h ${Math.round(((baseDistance % 70) + 15) * weatherImpact)}m`,
+          co2Emissions: Math.round(((baseDistance * 2.5) / fuelEff + (cargoWeight * 0.012)) * weatherImpact),
           fuelCost: Math.round((baseDistance * 100) / fuelEff),
           description: "Shortest time with highways and expressways"
         },
@@ -88,8 +98,8 @@ const RouteOptimizer = () => {
           id: 3,
           name: "Balanced Route",
           distance: Math.round(baseDistance * 1.05),
-          estimatedTime: `${Math.round(baseDistance / 65 + 1)}h ${Math.round((baseDistance % 65) + 20)}m`,
-          co2Emissions: Math.round((baseDistance * 1.05 * 2.4) / fuelEff + (cargoWeight * 0.011)),
+          estimatedTime: `${Math.round((baseDistance / 65 + 1) * weatherImpact)}h ${Math.round(((baseDistance % 65) + 20) * weatherImpact)}m`,
+          co2Emissions: Math.round(((baseDistance * 1.05 * 2.4) / fuelEff + (cargoWeight * 0.011)) * weatherImpact),
           fuelCost: Math.round((baseDistance * 1.05 * 100) / fuelEff),
           description: "Good balance between time and environmental impact"
         }
@@ -170,20 +180,20 @@ const RouteOptimizer = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="vehicleType" className="flex items-center text-foreground">
+                  <Label htmlFor="weatherType" className="flex items-center text-foreground">
                     <Car className="w-4 h-4 mr-2 text-eco-primary" />
-                    Vehicle Type
+                    Weather Type
                   </Label>
-                  <Select value={formData.vehicleType} onValueChange={(value) => setFormData({...formData, vehicleType: value})}>
+                  <Select value={formData.weatherType} onValueChange={(value) => setFormData({...formData, weatherType: value})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select vehicle type" />
+                      <SelectValue placeholder="Select weather type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="car-petrol">Car (Petrol)</SelectItem>
-                      <SelectItem value="car-diesel">Car (Diesel)</SelectItem>
-                      <SelectItem value="truck-small">Small Truck</SelectItem>
-                      <SelectItem value="truck-large">Large Truck</SelectItem>
-                      <SelectItem value="motorcycle">Motorcycle</SelectItem>
+                      <SelectItem value="clear">Clear</SelectItem>
+                      <SelectItem value="rainy">Rainy</SelectItem>
+                      <SelectItem value="foggy">Foggy</SelectItem>
+                      <SelectItem value="storm">Storm</SelectItem>
+                      <SelectItem value="summer">Summer</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
